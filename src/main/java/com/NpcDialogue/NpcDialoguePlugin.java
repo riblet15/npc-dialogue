@@ -55,6 +55,7 @@ public class NpcDialoguePlugin extends Plugin
 
     private String lastNpcDialogueText = null;
     private String lastPlayerDialogueText = null;
+    private String lastSpriteText = null;
     private Widget[] dialogueOptions;
     private NpcDialoguePanel panel;
     private NavigationButton navButton;
@@ -100,30 +101,56 @@ public class NpcDialoguePlugin extends Plugin
     public void onGameTick(GameTick tick) {
         Widget npcDialogueTextWidget = client.getWidget(WidgetInfo.DIALOG_NPC_TEXT);
 
-        if (npcDialogueTextWidget != null && npcDialogueTextWidget.getText() != lastNpcDialogueText) {
+        if (npcDialogueTextWidget != null && !npcDialogueTextWidget.getText().equals(lastNpcDialogueText)) {
             String npcText = npcDialogueTextWidget.getText();
             lastNpcDialogueText = npcText;
 
             String npcName = client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText();
-            panel.appendText(npcName + ": " + npcText);
+            panel.appendText("* '''" + npcName + "''': " + npcText);
         }
 
         // This should be in WidgetInfo under DialogPlayer, but isn't currently.
         Widget playerDialogueTextWidget = client.getWidget(WidgetInfo.DIALOG_PLAYER_TEXT);
 
-        if (playerDialogueTextWidget != null && playerDialogueTextWidget.getText() != lastPlayerDialogueText) {
+        if (playerDialogueTextWidget != null && !playerDialogueTextWidget.getText().equals(lastPlayerDialogueText)) {
             String playerText = playerDialogueTextWidget.getText();
             lastPlayerDialogueText = playerText;
 
-            panel.appendText("Player: " + playerText);
+            panel.appendText("* '''Player''': " + playerText);
         }
 
         Widget playerDialogueOptionsWidget = client.getWidget(WidgetID.DIALOG_OPTION_GROUP_ID, 1);
         if (playerDialogueOptionsWidget != null && playerDialogueOptionsWidget.getChildren() != dialogueOptions) {
             dialogueOptions = playerDialogueOptionsWidget.getChildren();
+            panel.appendText("* {{tselect|" + dialogueOptions[0].getText() + "}}");
             for (int i = 1; i < dialogueOptions.length - 2; i++) {
-                panel.appendText("Option: " + dialogueOptions[i].getText());
+                panel.appendText("* {{topt|" + dialogueOptions[i].getText() + "}}");
             }
+        }
+
+        Widget spriteTextWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_TEXT);
+        if (spriteTextWidget != null && !spriteTextWidget.getText().equals(lastSpriteText)) {
+            String spriteText = spriteTextWidget.getText();
+            lastSpriteText = spriteText;
+            Widget spriteWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE);
+            int id = spriteWidget.getItemId();
+            panel.appendText("* {{tchatbox|pic=" + id + " detail.png|" + spriteText + "}}");
+        }
+
+        Widget msgTextWidget = client.getWidget(229, 1);
+        if (msgTextWidget != null && !msgTextWidget.getText().equals(lastSpriteText)) {
+            String msgText = msgTextWidget.getText();
+            lastSpriteText = msgText;
+            panel.appendText("* {{tchatbox|" + msgText + "}}");
+        }
+
+        Widget doubleSpriteTextWidget = client.getWidget(11, 2);
+        if (doubleSpriteTextWidget != null && !doubleSpriteTextWidget.getText().equals(lastSpriteText)) {
+            String doubleSpriteText = doubleSpriteTextWidget.getText();
+            lastSpriteText = doubleSpriteText;
+            int id1 = client.getWidget(11, 1).getItemId();
+            int id2 = client.getWidget(11, 3).getItemId();
+            panel.appendText("* {{tchatbox|pic=" + id1 + " detail.png|pic2=" + id2 + " detail.png|" + doubleSpriteText + "}}");
         }
     }
 }
