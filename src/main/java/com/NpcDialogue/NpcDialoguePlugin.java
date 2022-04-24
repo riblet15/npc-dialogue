@@ -88,7 +88,7 @@ public class NpcDialoguePlugin extends Plugin
 
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked) {
-        if (menuOptionClicked.getMenuAction() == MenuAction.WIDGET_TYPE_6 && menuOptionClicked.getMenuOption().equals("Continue")) {
+        if (menuOptionClicked.getMenuAction() == MenuAction.WIDGET_CONTINUE && menuOptionClicked.getMenuOption().equals("Continue")) {
             int actionParam = menuOptionClicked.getActionParam();
             // if -1, "Click here to continue"
             if (actionParam > 0 && actionParam < dialogueOptions.length) {
