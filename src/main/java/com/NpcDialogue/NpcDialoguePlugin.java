@@ -106,7 +106,7 @@ public class NpcDialoguePlugin extends Plugin
             lastNpcDialogueText = npcText;
 
             String npcName = client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText();
-            panel.appendText("* '''" + npcName + "''': " + npcText);
+            panel.appendText("* '''" + npcName + ":''' " + npcText);
         }
 
         // This should be in WidgetInfo under DialogPlayer, but isn't currently.
@@ -116,7 +116,7 @@ public class NpcDialoguePlugin extends Plugin
             String playerText = playerDialogueTextWidget.getText();
             lastPlayerDialogueText = playerText;
 
-            panel.appendText("* '''Player''': " + playerText);
+            panel.appendText("* '''Player:''' " + playerText);
         }
 
         Widget playerDialogueOptionsWidget = client.getWidget(WidgetID.DIALOG_OPTION_GROUP_ID, 1);
@@ -134,14 +134,14 @@ public class NpcDialoguePlugin extends Plugin
             lastSpriteText = spriteText;
             Widget spriteWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE);
             int id = spriteWidget.getItemId();
-            panel.appendText("* {{tchatbox|pic=" + id + " detail.png|" + spriteText + "}}");
+            panel.appendText("* {{tbox|pic=" + id + " detail.png|" + spriteText + "}}");
         }
 
         Widget msgTextWidget = client.getWidget(229, 1);
         if (msgTextWidget != null && !msgTextWidget.getText().equals(lastSpriteText)) {
             String msgText = msgTextWidget.getText();
             lastSpriteText = msgText;
-            panel.appendText("* {{tchatbox|" + msgText + "}}");
+            panel.appendText("* {{tbox|" + msgText + "}}");
         }
 
         Widget doubleSpriteTextWidget = client.getWidget(11, 2);
@@ -150,7 +150,7 @@ public class NpcDialoguePlugin extends Plugin
             lastSpriteText = doubleSpriteText;
             int id1 = client.getWidget(11, 1).getItemId();
             int id2 = client.getWidget(11, 3).getItemId();
-            panel.appendText("* {{tchatbox|pic=" + id1 + " detail.png|pic2=" + id2 + " detail.png|" + doubleSpriteText + "}}");
+            panel.appendText("* {{tbox|pic=" + id1 + " detail.png|pic2=" + id2 + " detail.png|" + doubleSpriteText + "}}");
         }
     }
 }
