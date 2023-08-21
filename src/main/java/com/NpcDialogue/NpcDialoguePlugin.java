@@ -53,12 +53,12 @@ public class NpcDialoguePlugin extends Plugin
     @Inject
     private ClientToolbar clientToolbar;
 
-    private String lastNpcDialogueText = null;
-    private String lastPlayerDialogueText = null;
-    private String lastSpriteText = null;
+    private String lastText = null;
     private Widget[] dialogueOptions;
     private NpcDialoguePanel panel;
     private NavigationButton navButton;
+
+	private int treeDepth = 1;
 
     @Override
     public void startUp()
@@ -93,6 +93,8 @@ public class NpcDialoguePlugin extends Plugin
             // if -1, "Click here to continue"
             if (actionParam > 0 && actionParam < dialogueOptions.length) {
                 panel.appendText("<chose " + dialogueOptions[actionParam].getText() + ">");
+//                appendText("{{topt|" + dialogueOptions[actionParam].getText() + "}}");
+				treeDepth++;
             }
         }
     }
@@ -101,56 +103,76 @@ public class NpcDialoguePlugin extends Plugin
     public void onGameTick(GameTick tick) {
         Widget npcDialogueTextWidget = client.getWidget(WidgetInfo.DIALOG_NPC_TEXT);
 
-        if (npcDialogueTextWidget != null && !npcDialogueTextWidget.getText().equals(lastNpcDialogueText)) {
+        if (npcDialogueTextWidget != null && !npcDialogueTextWidget.getText().equals(lastText)) {
             String npcText = npcDialogueTextWidget.getText();
-            lastNpcDialogueText = npcText;
+            lastText = npcText;
 
             String npcName = client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText();
-            panel.appendText("* '''" + npcName + ":''' " + npcText);
+            appendText("'''" + npcName + ":''' " + npcText);
         }
 
         // This should be in WidgetInfo under DialogPlayer, but isn't currently.
         Widget playerDialogueTextWidget = client.getWidget(WidgetInfo.DIALOG_PLAYER_TEXT);
 
-        if (playerDialogueTextWidget != null && !playerDialogueTextWidget.getText().equals(lastPlayerDialogueText)) {
+        if (playerDialogueTextWidget != null && !playerDialogueTextWidget.getText().equals(lastText)) {
             String playerText = playerDialogueTextWidget.getText();
-            lastPlayerDialogueText = playerText;
+            lastText = playerText;
 
-            panel.appendText("* '''Player:''' " + playerText);
+            appendText("'''Player:''' " + playerText);
         }
 
         Widget playerDialogueOptionsWidget = client.getWidget(WidgetID.DIALOG_OPTION_GROUP_ID, 1);
         if (playerDialogueOptionsWidget != null && playerDialogueOptionsWidget.getChildren() != dialogueOptions) {
             dialogueOptions = playerDialogueOptionsWidget.getChildren();
-            panel.appendText("* {{tselect|" + dialogueOptions[0].getText() + "}}");
+            appendText("{{tselect|" + dialogueOptions[0].getText() + "}}");
             for (int i = 1; i < dialogueOptions.length - 2; i++) {
-                panel.appendText("* {{topt|" + dialogueOptions[i].getText() + "}}");
+                appendText("{{topt|" + dialogueOptions[i].getText() + "}}");
             }
         }
 
         Widget spriteTextWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_TEXT);
-        if (spriteTextWidget != null && !spriteTextWidget.getText().equals(lastSpriteText)) {
+        if (spriteTextWidget != null && !spriteTextWidget.getText().equals(lastText)) {
             String spriteText = spriteTextWidget.getText();
-            lastSpriteText = spriteText;
+            lastText = spriteText;
             Widget spriteWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE);
             int id = spriteWidget.getItemId();
-            panel.appendText("* {{tbox|pic=" + id + " detail.png|" + spriteText + "}}");
+            appendText("{{tbox|pic=" + id + " detail.png|" + spriteText + "}}");
         }
 
         Widget msgTextWidget = client.getWidget(229, 1);
-        if (msgTextWidget != null && !msgTextWidget.getText().equals(lastSpriteText)) {
+        if (msgTextWidget != null && !msgTextWidget.getText().equals(lastText)) {
             String msgText = msgTextWidget.getText();
-            lastSpriteText = msgText;
-            panel.appendText("* {{tbox|" + msgText + "}}");
+            lastText = msgText;
+            appendText("{{tbox|" + msgText + "}}");
         }
 
         Widget doubleSpriteTextWidget = client.getWidget(11, 2);
-        if (doubleSpriteTextWidget != null && !doubleSpriteTextWidget.getText().equals(lastSpriteText)) {
+        if (doubleSpriteTextWidget != null && !doubleSpriteTextWidget.getText().equals(lastText)) {
             String doubleSpriteText = doubleSpriteTextWidget.getText();
-            lastSpriteText = doubleSpriteText;
+            lastText = doubleSpriteText;
             int id1 = client.getWidget(11, 1).getItemId();
             int id2 = client.getWidget(11, 3).getItemId();
-            panel.appendText("* {{tbox|pic=" + id1 + " detail.png|pic2=" + id2 + " detail.png|" + doubleSpriteText + "}}");
+            appendText("{{tbox|pic=" + id1 + " detail.png|pic2=" + id2 + " detail.png|" + doubleSpriteText + "}}");
         }
+
+		if (npcDialogueTextWidget == null
+			&& playerDialogueTextWidget == null
+			&& playerDialogueOptionsWidget == null
+			&& spriteTextWidget == null
+			&& msgTextWidget == null
+			&& doubleSpriteTextWidget == null
+			&& treeDepth > 1
+		) {
+			appendText("{{tact|end}}");
+			treeDepth = 1; //Reset depth if no dialog is open
+		}
     }
+
+	private void appendText(String text) {
+		String indent = "*";
+		for(int i = 1; i < treeDepth; i++) {
+			indent += "*";
+		}
+		panel.appendText(indent + " " + text);
+	}
 }
