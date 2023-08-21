@@ -24,9 +24,16 @@
  */
 package com.NpcDialogue;
 
+import com.NpcDialogue.node.DialogueNode;
+import com.NpcDialogue.node.MetaDialogueNode;
+import com.NpcDialogue.node.NPCDialogueNode;
+import com.NpcDialogue.node.OptionDialogueNode;
+import com.NpcDialogue.node.PlayerDialogueNode;
+import com.NpcDialogue.node.SelectDialogueNode;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import net.runelite.api.Client;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuAction;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -58,14 +65,15 @@ public class NpcDialoguePlugin extends Plugin
     private NpcDialoguePanel panel;
     private NavigationButton navButton;
 
-	private int treeDepth = 1;
+	private DialogueNode rootNode = new DialogueNode("");
+	private DialogueNode curParentNode = rootNode;
 
     @Override
     public void startUp()
     {
         // Shamelessly copied from NotesPlugin
         panel = injector.getInstance(NpcDialoguePanel.class);
-        panel.init();
+        panel.init(this);
 
         // Hack to get around not having resources.
         final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "dialogue_icon.png");
@@ -92,9 +100,7 @@ public class NpcDialoguePlugin extends Plugin
             int actionParam = menuOptionClicked.getActionParam();
             // if -1, "Click here to continue"
             if (actionParam > 0 && actionParam < dialogueOptions.length) {
-                panel.appendText("<chose " + dialogueOptions[actionParam].getText() + ">");
-//                appendText("{{topt|" + dialogueOptions[actionParam].getText() + "}}");
-				treeDepth++;
+				curParentNode = curParentNode.findOption(dialogueOptions[actionParam].getText());
             }
         }
     }
@@ -108,7 +114,8 @@ public class NpcDialoguePlugin extends Plugin
             lastText = npcText;
 
             String npcName = client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText();
-            appendText("'''" + npcName + ":''' " + npcText);
+			curParentNode.addChild(new NPCDialogueNode(npcName, npcText));
+			printTree();
         }
 
         // This should be in WidgetInfo under DialogPlayer, but isn't currently.
@@ -118,16 +125,60 @@ public class NpcDialoguePlugin extends Plugin
             String playerText = playerDialogueTextWidget.getText();
             lastText = playerText;
 
-            appendText("'''Player:''' " + playerText);
+			curParentNode.addChild(new PlayerDialogueNode(playerText));
+			printTree();
         }
 
         Widget playerDialogueOptionsWidget = client.getWidget(WidgetID.DIALOG_OPTION_GROUP_ID, 1);
         if (playerDialogueOptionsWidget != null && playerDialogueOptionsWidget.getChildren() != dialogueOptions) {
             dialogueOptions = playerDialogueOptionsWidget.getChildren();
-            appendText("{{tselect|" + dialogueOptions[0].getText() + "}}");
-            for (int i = 1; i < dialogueOptions.length - 2; i++) {
-                appendText("{{topt|" + dialogueOptions[i].getText() + "}}");
-            }
+
+			//Detect loop
+			boolean loop = false;
+			DialogueNode existingSelectNode = rootNode.findOption(dialogueOptions[0].getText());
+			int totalOptions = dialogueOptions.length - 3;
+			if(existingSelectNode != null
+				&& curParentNode != rootNode
+				&& curParentNode != existingSelectNode
+				&& totalOptions > 2 //There are many "fake duplicates" if you count dialogs with 2 options, such as simple yes/no choices
+			) {
+				int matchingOptions = 0;
+				for (int i = 1; i < dialogueOptions.length - 2; i++) {
+					DialogueNode existingOption = existingSelectNode.findOption(dialogueOptions[i].getText());
+					if(existingOption != null) {
+						matchingOptions++;
+					}
+				}
+				if(matchingOptions == totalOptions) {
+					if(rootNode.getChildren().contains(existingSelectNode)) {
+						//If the existing select node is the direct child of root, initial
+						curParentNode.addChild(new MetaDialogueNode("{{tact|initial}}"));
+						loop = true;
+					} else {
+						//If the existing select node isn't the direct child of root, go previous
+						curParentNode.addChild(new MetaDialogueNode("{{tact|previous}}"));
+						loop = true;
+					}
+				}
+				if(matchingOptions == totalOptions - 1) {
+					curParentNode.addChild(new MetaDialogueNode("{{tact|other}}"));
+					loop = true;
+				}
+			}
+
+			if(loop) {
+				curParentNode = existingSelectNode;
+			} else {
+				DialogueNode selectNode = new SelectDialogueNode(dialogueOptions[0].getText());
+				//This lets us rewalk the tree after restarting dialogue
+				selectNode = curParentNode.addChild(selectNode);
+				curParentNode = selectNode;
+				for (int i = 1; i < dialogueOptions.length - 2; i++)
+				{
+					curParentNode.addChild(new OptionDialogueNode(dialogueOptions[i].getText()));
+				}
+			}
+			printTree();
         }
 
         Widget spriteTextWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_TEXT);
@@ -135,24 +186,39 @@ public class NpcDialoguePlugin extends Plugin
             String spriteText = spriteTextWidget.getText();
             lastText = spriteText;
             Widget spriteWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE);
-            int id = spriteWidget.getItemId();
-            appendText("{{tbox|pic=" + id + " detail.png|" + spriteText + "}}");
+			String itemName = "<!--Error-->";
+			if(spriteWidget != null) {
+				itemName = client.getItemDefinition(spriteWidget.getItemId()).getName();
+			}
+			curParentNode.addChild(new DialogueNode("{{tbox|pic=" + itemName + " detail.png|" + spriteText + "}}"));
+			printTree();
         }
 
         Widget msgTextWidget = client.getWidget(229, 1);
         if (msgTextWidget != null && !msgTextWidget.getText().equals(lastText)) {
             String msgText = msgTextWidget.getText();
             lastText = msgText;
-            appendText("{{tbox|" + msgText + "}}");
+			curParentNode.addChild(new DialogueNode("{{tbox|" + msgText + "}}"));
+			printTree();
         }
 
         Widget doubleSpriteTextWidget = client.getWidget(11, 2);
         if (doubleSpriteTextWidget != null && !doubleSpriteTextWidget.getText().equals(lastText)) {
             String doubleSpriteText = doubleSpriteTextWidget.getText();
             lastText = doubleSpriteText;
-            int id1 = client.getWidget(11, 1).getItemId();
-            int id2 = client.getWidget(11, 3).getItemId();
-            appendText("{{tbox|pic=" + id1 + " detail.png|pic2=" + id2 + " detail.png|" + doubleSpriteText + "}}");
+			Widget widget1 = client.getWidget(11, 1);
+			Widget widget2 = client.getWidget(11, 3);
+			String itemName1 = "<!--Error-->";
+			String itemName2 = "<!--Error-->";
+			if (widget1 != null) {
+				itemName1 = client.getItemDefinition(widget1.getItemId()).getName();
+			}
+			if (widget2 != null) {
+				itemName2 = client.getItemDefinition(widget2.getItemId()).getName();
+			}
+			//TODO test this by tethering to tempoross pole without rope/gear
+			curParentNode.addChild(new DialogueNode("{{tbox|pic=" + itemName1 + " detail.png|pic2=" + itemName2 + " detail.png|" + doubleSpriteText + "}}"));
+			printTree();
         }
 
 		if (npcDialogueTextWidget == null
@@ -161,18 +227,26 @@ public class NpcDialoguePlugin extends Plugin
 			&& spriteTextWidget == null
 			&& msgTextWidget == null
 			&& doubleSpriteTextWidget == null
-			&& treeDepth > 1
+			&& lastText != null
 		) {
-			appendText("{{tact|end}}");
-			treeDepth = 1; //Reset depth if no dialog is open
+
+			printTree();
+			curParentNode = rootNode;
+			lastText = null;
+
 		}
     }
 
-	private void appendText(String text) {
-		String indent = "*";
-		for(int i = 1; i < treeDepth; i++) {
-			indent += "*";
-		}
-		panel.appendText(indent + " " + text);
+	private void printTree() {
+		StringBuilder sb = new StringBuilder();
+		rootNode.print(sb, 1);
+		panel.setText(sb.toString());
+	}
+
+	public void reset() {
+		rootNode = new DialogueNode("");
+		curParentNode = rootNode;
+		lastText = null;
+		panel.setText("");
 	}
 }
