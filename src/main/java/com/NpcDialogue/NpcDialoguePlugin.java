@@ -33,7 +33,6 @@ import com.NpcDialogue.node.SelectDialogueNode;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuAction;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -140,7 +139,8 @@ public class NpcDialoguePlugin extends Plugin
 			if(existingSelectNode != null
 				&& curParentNode != rootNode
 				&& curParentNode != existingSelectNode
-				&& totalOptions > 2 //There are many "fake duplicates" if you count dialogs with 2 options, such as simple yes/no choices
+				//I think I was wrong about the fake duplicates
+//				&& totalOptions > 2 //There are many "fake duplicates" if you count dialogs with 2 options, such as simple yes/no choices
 			) {
 				int matchingOptions = 0;
 				for (int i = 1; i < dialogueOptions.length - 2; i++) {
@@ -240,7 +240,8 @@ public class NpcDialoguePlugin extends Plugin
 	private void printTree() {
 		StringBuilder sb = new StringBuilder();
 		rootNode.print(sb, 1);
-		panel.setText(sb.toString());
+		String playerName = client.getLocalPlayer().getName();
+		panel.setText(sb.toString().replaceAll(playerName, "[player name]"));
 	}
 
 	public void reset() {
