@@ -135,33 +135,17 @@ public class NpcDialoguePlugin extends Plugin
 			//Detect loop
 			boolean loop = false;
 			DialogueNode existingSelectNode = rootNode.findOption(dialogueOptions[0].getText());
-			int totalOptions = dialogueOptions.length - 3;
-			if(existingSelectNode != null
-				&& curParentNode != rootNode
-				&& curParentNode != existingSelectNode
-				//I think I was wrong about the fake duplicates
-//				&& totalOptions > 2 //There are many "fake duplicates" if you count dialogs with 2 options, such as simple yes/no choices
-			) {
+			int totalOptions = dialogueOptions.length - 1;
+			if(existingSelectNode != null) {
 				int matchingOptions = 0;
-				for (int i = 1; i < dialogueOptions.length - 2; i++) {
+				for (int i = 0; i < dialogueOptions.length - 1; i++) {
 					DialogueNode existingOption = existingSelectNode.findOption(dialogueOptions[i].getText());
 					if(existingOption != null) {
 						matchingOptions++;
 					}
 				}
-				if(matchingOptions == totalOptions) {
-					if(rootNode.getChildren().contains(existingSelectNode)) {
-						//If the existing select node is the direct child of root, initial
-						curParentNode.addChild(new MetaDialogueNode("{{tact|initial}}"));
-						loop = true;
-					} else {
-						//If the existing select node isn't the direct child of root, go previous
-						curParentNode.addChild(new MetaDialogueNode("{{tact|previous}}"));
-						loop = true;
-					}
-				}
-				if(matchingOptions == totalOptions - 1) {
-					curParentNode.addChild(new MetaDialogueNode("{{tact|other}}"));
+				if(matchingOptions == totalOptions || matchingOptions == totalOptions - 1) {
+					curParentNode.addChild(new MetaDialogueNode("{{tact|a previous option menu is displayed}}"));
 					loop = true;
 				}
 			}
@@ -216,7 +200,7 @@ public class NpcDialoguePlugin extends Plugin
 			if (widget2 != null) {
 				itemName2 = client.getItemDefinition(widget2.getItemId()).getName();
 			}
-			//TODO test this by tethering to tempoross pole without rope/gear
+			//TODO test this by tethering to tempoddross pole without rope/gear
 			curParentNode.addChild(new DialogueNode("{{tbox|pic=" + itemName1 + " detail.png|pic2=" + itemName2 + " detail.png|" + doubleSpriteText + "}}"));
 			printTree();
         }

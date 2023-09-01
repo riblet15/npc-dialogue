@@ -94,7 +94,8 @@ public class DialogueNode
 				n.print(sb, depth);
 			}
 			if(content.length() > 0
-			&& this instanceof OptionDialogueNode) {
+			&& this instanceof OptionDialogueNode
+			&& !(this.children.get(this.children.size() - 1) instanceof MetaDialogueNode)) {
 				this.printDepth(sb, depth);
 				sb.append("{{tact|end}}\n");
 			}
