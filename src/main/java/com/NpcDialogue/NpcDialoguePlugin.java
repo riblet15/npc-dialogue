@@ -171,10 +171,12 @@ public class NpcDialoguePlugin extends Plugin
             lastText = spriteText;
             Widget spriteWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE);
 			String itemName = "<!--Error-->";
+			int itemid = -1;
 			if(spriteWidget != null) {
 				itemName = client.getItemDefinition(spriteWidget.getItemId()).getName();
+				itemid = spriteWidget.getItemId();
 			}
-			curParentNode.addChild(new DialogueNode("{{tbox|pic=" + itemName + " detail.png|" + spriteText + "}}"));
+			curParentNode.addChild(new DialogueNode("{{tbox|<!--id: "+ itemid + "-->pic=" + itemName + " detail.png|" + spriteText + "}}"));
 			printTree();
         }
 
@@ -194,14 +196,17 @@ public class NpcDialoguePlugin extends Plugin
 			Widget widget2 = client.getWidget(11, 3);
 			String itemName1 = "<!--Error-->";
 			String itemName2 = "<!--Error-->";
+			int itemid1 = -1;
+			int itemid2 = -1;
 			if (widget1 != null) {
 				itemName1 = client.getItemDefinition(widget1.getItemId()).getName();
+				itemid1 = widget1.getItemId();
 			}
 			if (widget2 != null) {
 				itemName2 = client.getItemDefinition(widget2.getItemId()).getName();
+				itemid2 = widget2.getItemId();
 			}
-			//TODO test this by tethering to tempoddross pole without rope/gear
-			curParentNode.addChild(new DialogueNode("{{tbox|pic=" + itemName1 + " detail.png|pic2=" + itemName2 + " detail.png|" + doubleSpriteText + "}}"));
+			curParentNode.addChild(new DialogueNode("{{tbox|<!--id: "+ itemid1 + "-->pic=" + itemName1 + " detail.png|<!--id: "+ itemid2 + "-->pic2=" + itemName2 + " detail.png|" + doubleSpriteText + "}}"));
 			printTree();
         }
 
