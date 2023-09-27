@@ -27,6 +27,7 @@ package com.NpcDialogue;
 
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
@@ -39,10 +40,11 @@ class NpcDialoguePanel extends PluginPanel
 {
     private final JTextArea notesEditor = new JTextArea();
 
-    void init()
+    void init(NpcDialoguePlugin plugin)
     {
         getParent().setLayout(new BorderLayout());
         getParent().add(this, BorderLayout.CENTER);
+
 
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -62,6 +64,12 @@ class NpcDialoguePanel extends PluginPanel
         notesContainer.add(notesEditor, BorderLayout.CENTER);
         notesContainer.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+		JButton resetButton = new JButton("RESET");
+		resetButton.setSize(250, 25);
+		resetButton.addActionListener((ev) ->
+			plugin.reset());
+		add(resetButton, BorderLayout.CENTER);
+
         add(notesContainer, BorderLayout.CENTER);
     }
 
@@ -69,4 +77,8 @@ class NpcDialoguePanel extends PluginPanel
     {
         notesEditor.append(data.replaceAll("<br>", " ") + "\n");
     }
+
+	void setText(String data) {
+		notesEditor.setText(data.replaceAll("<br>", " ") + "\n");
+	}
 }
