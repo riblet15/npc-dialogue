@@ -28,14 +28,14 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
+import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.widgets.InterfaceID;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetID;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.util.ImageUtil;
@@ -99,18 +99,18 @@ public class NpcDialoguePlugin extends Plugin
 
     @Subscribe
     public void onGameTick(GameTick tick) {
-        Widget npcDialogueTextWidget = client.getWidget(WidgetInfo.DIALOG_NPC_TEXT);
+        Widget npcDialogueTextWidget = client.getWidget(ComponentID.DIALOG_NPC_TEXT);
 
         if (npcDialogueTextWidget != null && !npcDialogueTextWidget.getText().equals(lastNpcDialogueText)) {
             String npcText = npcDialogueTextWidget.getText();
             lastNpcDialogueText = npcText;
 
-            String npcName = client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText();
+            String npcName = client.getWidget(ComponentID.DIALOG_NPC_NAME).getText();
             panel.appendText("* '''" + npcName + ":''' " + npcText);
         }
 
         // This should be in WidgetInfo under DialogPlayer, but isn't currently.
-        Widget playerDialogueTextWidget = client.getWidget(WidgetInfo.DIALOG_PLAYER_TEXT);
+        Widget playerDialogueTextWidget = client.getWidget(ComponentID.DIALOG_PLAYER_TEXT);
 
         if (playerDialogueTextWidget != null && !playerDialogueTextWidget.getText().equals(lastPlayerDialogueText)) {
             String playerText = playerDialogueTextWidget.getText();
@@ -119,7 +119,7 @@ public class NpcDialoguePlugin extends Plugin
             panel.appendText("* '''Player:''' " + playerText);
         }
 
-        Widget playerDialogueOptionsWidget = client.getWidget(WidgetID.DIALOG_OPTION_GROUP_ID, 1);
+        Widget playerDialogueOptionsWidget = client.getWidget(InterfaceID.DIALOG_OPTION, 1);
         if (playerDialogueOptionsWidget != null && playerDialogueOptionsWidget.getChildren() != dialogueOptions) {
             dialogueOptions = playerDialogueOptionsWidget.getChildren();
             panel.appendText("* {{tselect|" + dialogueOptions[0].getText() + "}}");
@@ -128,11 +128,11 @@ public class NpcDialoguePlugin extends Plugin
             }
         }
 
-        Widget spriteTextWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_TEXT);
+        Widget spriteTextWidget = client.getWidget(ComponentID.DIALOG_SPRITE_TEXT);
         if (spriteTextWidget != null && !spriteTextWidget.getText().equals(lastSpriteText)) {
             String spriteText = spriteTextWidget.getText();
             lastSpriteText = spriteText;
-            Widget spriteWidget = client.getWidget(WidgetInfo.DIALOG_SPRITE_SPRITE);
+            Widget spriteWidget = client.getWidget(ComponentID.DIALOG_SPRITE_SPRITE);
             int id = spriteWidget.getItemId();
             panel.appendText("* {{tbox|pic=" + id + " detail.png|" + spriteText + "}}");
         }
