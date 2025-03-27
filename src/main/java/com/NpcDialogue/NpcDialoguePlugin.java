@@ -116,7 +116,7 @@ public class NpcDialoguePlugin extends Plugin
 	public void onGameTick(GameTick tick)
 	{
 		Widget npcDialogueTextWidget = client.getWidget(ComponentID.DIALOG_NPC_TEXT);
-		if (npcDialogueTextWidget != null && (lastDialogueType != DialogInterfaceType.NPC || !npcDialogueTextWidget.getText().equals(lastSeenText)))
+		if (npcDialogueTextWidget != null && !npcDialogueTextWidget.getText().isEmpty() && (lastDialogueType != DialogInterfaceType.NPC || !npcDialogueTextWidget.getText().equals(lastSeenText)))
 		{
 			lastDialogueType = DialogInterfaceType.NPC;
 			String npcText = npcDialogueTextWidget.getText();
@@ -128,7 +128,7 @@ public class NpcDialoguePlugin extends Plugin
 
 		// This should be in WidgetInfo under DialogPlayer, but isn't currently.
 		Widget playerDialogueTextWidget = client.getWidget(ComponentID.DIALOG_PLAYER_TEXT);
-		if (playerDialogueTextWidget != null && (lastDialogueType != DialogInterfaceType.PLAYER || !playerDialogueTextWidget.getText().equals(lastSeenText)))
+		if (playerDialogueTextWidget != null && !playerDialogueTextWidget.getText().isEmpty() && (lastDialogueType != DialogInterfaceType.PLAYER || !playerDialogueTextWidget.getText().equals(lastSeenText)))
 		{
 			lastDialogueType = DialogInterfaceType.PLAYER;
 			String playerText = playerDialogueTextWidget.getText();
@@ -150,7 +150,7 @@ public class NpcDialoguePlugin extends Plugin
 		}
 
 		Widget msgTextWidget = client.getWidget(229, 1);
-		if (msgTextWidget != null && (lastDialogueType != DialogInterfaceType.MESSAGE_BOX || !msgTextWidget.getText().equals(lastSeenText)))
+		if (msgTextWidget != null && !msgTextWidget.getText().isEmpty() && (lastDialogueType != DialogInterfaceType.MESSAGE_BOX || !msgTextWidget.getText().equals(lastSeenText)))
 		{
 			lastDialogueType = DialogInterfaceType.MESSAGE_BOX;
 			String msgText = msgTextWidget.getText();
@@ -159,7 +159,7 @@ public class NpcDialoguePlugin extends Plugin
 		}
 
 		Widget objectBoxWidget = client.getWidget(ComponentID.DIALOG_SPRITE_TEXT);
-		if (objectBoxWidget != null && (lastDialogueType != DialogInterfaceType.OBJECT_BOX || !objectBoxWidget.getText().equals(lastSeenText)))
+		if (objectBoxWidget != null && !objectBoxWidget.getText().isEmpty() && (lastDialogueType != DialogInterfaceType.OBJECT_BOX || !objectBoxWidget.getText().equals(lastSeenText)))
 		{
 			lastDialogueType = DialogInterfaceType.OBJECT_BOX;
 			String spriteText = objectBoxWidget.getText();
@@ -179,7 +179,7 @@ public class NpcDialoguePlugin extends Plugin
 		}
 
 		Widget doubleObjectBoxWidget = client.getWidget(11, 2);
-		if (doubleObjectBoxWidget != null && (lastDialogueType != DialogInterfaceType.DOUBLE_OBJECT_BOX || !doubleObjectBoxWidget.getText().equals(lastSeenText)))
+		if (doubleObjectBoxWidget != null && !doubleObjectBoxWidget.getText().isEmpty() && (lastDialogueType != DialogInterfaceType.DOUBLE_OBJECT_BOX || !doubleObjectBoxWidget.getText().equals(lastSeenText)))
 		{
 			lastDialogueType = DialogInterfaceType.DOUBLE_OBJECT_BOX;
 			String doubleObjectBoxText = doubleObjectBoxWidget.getText();
@@ -190,7 +190,7 @@ public class NpcDialoguePlugin extends Plugin
 		}
 
 		Widget spriteBoxWidget = client.getWidget(41484291);
-		if (spriteBoxWidget != null && (lastDialogueType != DialogInterfaceType.SPRITE_BOX || !spriteBoxWidget.getText().equals(lastSeenText)))
+		if (spriteBoxWidget != null && !spriteBoxWidget.getText().isEmpty() && (lastDialogueType != DialogInterfaceType.SPRITE_BOX || !spriteBoxWidget.getText().equals(lastSeenText)))
 		{
 			lastDialogueType = DialogInterfaceType.SPRITE_BOX;
 			String spriteBoxText = spriteBoxWidget.getText();
